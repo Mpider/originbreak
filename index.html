@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ORIGIN_BREAK — GİZLİ ERIŞIM // UNAUTHORIZED NODE</title>
+  <meta name="description" content="Bu sayfayı bulmamalıydınız. Ama artık burada olduğunuza göre... dinleyin." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --cyan: #00f5ff;
+      --cyan-dim: #00b3bb;
+      --red-warn: #ff3333;
+      --dark: #020408;
+      --text: #8abed0;
+      --dim: #2a4a55;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--dark);
+      color: var(--text);
+      font-family: 'Share Tech Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+      cursor: crosshair;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px);
+      pointer-events: none;
+      z-index: 9999;
+    }
+    @keyframes flicker { 0%,95%,100%{opacity:1}96%{opacity:0.4}97%{opacity:1}98%{opacity:0.6} }
+    @keyframes glitch { 0%,90%,100%{transform:translateX(0) skewX(0);filter:none}91%{transform:translateX(-4px) skewX(-1deg);filter:hue-rotate(90deg)}93%{transform:translateX(4px) skewX(1deg);filter:hue-rotate(-90deg)}95%{transform:translateX(-2px);filter:brightness(1.5)} }
+    @keyframes glitch-text { 0%,88%,100%{clip-path:none;transform:none}89%{clip-path:polygon(0 20%,100% 20%,100% 40%,0 40%);transform:translateX(-8px)}90%{clip-path:polygon(0 60%,100% 60%,100% 80%,0 80%);transform:translateX(8px)}91%{clip-path:none;transform:none} }
+    @keyframes blink { 0%,49%{opacity:1}50%,100%{opacity:0} }
+    @keyframes pulse-red { 0%,100%{box-shadow:0 0 10px rgba(255,51,51,0.3)}50%{box-shadow:0 0 30px rgba(255,51,51,0.8),0 0 60px rgba(255,51,51,0.3)} }
+    @keyframes pulse-cyan { 0%,100%{text-shadow:0 0 10px rgba(0,245,255,0.5)}50%{text-shadow:0 0 30px rgba(0,245,255,1),0 0 60px rgba(0,245,255,0.5)} }
+    @keyframes scanline-sweep { 0%{transform:translateY(-100%)}100%{transform:translateY(100vh)} }
+    .sweep-line { position:fixed;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);animation:scanline-sweep 8s linear infinite;opacity:0.3;z-index:9998; }
+    #boot-screen { position:fixed;inset:0;background:#000;z-index:10000;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:60px; }
+    .boot-line { font-size:clamp(11px,1.4vw,14px);margin-bottom:4px;opacity:0;white-space:nowrap;overflow:hidden; }
+    .boot-line.active { opacity:1; }
+    .boot-line.warn { color:var(--red-warn); }
+    .boot-line.ok { color:#00ff88; }
+    .boot-line.sys { color:var(--cyan); }
+    #main-page { display:none;min-height:100vh; }
+    header { border-bottom:1px solid var(--dim);padding:16px 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(2,4,8,0.95);backdrop-filter:blur(4px);z-index:100; }
+    .logo { font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;color:var(--cyan);animation:glitch 7s ease-in-out infinite,pulse-cyan 3s ease-in-out infinite;letter-spacing:4px; }
+    .status-dot { display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red-warn);margin-right:8px;animation:blink 1s step-end infinite;box-shadow:0 0 8px var(--red-warn); }
+    .header-status { font-size:11px;color:var(--red-warn); }
+    .hero { min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:40px 20px;position:relative; }
+    .hero-bg { position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 50%,rgba(0,50,60,0.4) 0%,transparent 70%),repeating-linear-gradient(90deg,transparent,transparent 80px,rgba(0,245,255,0.02) 80px,rgba(0,245,255,0.02) 81px),repeating-linear-gradient(0deg,transparent,transparent 80px,rgba(0,245,255,0.02) 80px,rgba(0,245,255,0.02) 81px);pointer-events:none; }
+    .warning-badge { display:inline-block;border:1px solid var(--red-warn);color:var(--red-warn);font-size:10px;letter-spacing:3px;padding:4px 16px;margin-bottom:32px;animation:pulse-red 2s ease-in-out infinite; }
+    .main-title { font-family:'Orbitron',sans-serif;font-size:clamp(48px,10vw,120px);font-weight:900;color:#fff;letter-spacing:8px;line-height:1;margin-bottom:8px;animation:glitch-text 9s ease-in-out infinite;text-shadow:2px 0 var(--cyan),-2px 0 rgba(255,0,100,0.5); }
+    .main-subtitle { font-family:'Orbitron',sans-serif;font-size:clamp(14px,3vw,22px);color:var(--cyan-dim);letter-spacing:12px;margin-bottom:48px;font-weight:400; }
+    .hero-quote { font-size:clamp(13px,1.8vw,16px);color:var(--text);max-width:600px;line-height:1.8;border-left:2px solid var(--cyan-dim);padding-left:20px;text-align:left;margin-bottom:60px; }
+    .hero-quote em { color:var(--cyan);font-style:normal; }
+    .transmission { border:1px solid var(--dim);padding:30px 40px;max-width:700px;width:100%;position:relative;background:rgba(0,30,40,0.4);margin-bottom:40px; }
+    .transmission::before { content:'[ YETKİSİZ ERİŞİM — VERİ AKTARIMI DEVAM EDİYOR ]';position:absolute;top:-10px;left:20px;background:var(--dark);padding:0 10px;font-size:10px;color:var(--red-warn);letter-spacing:2px; }
+    .tx-line { font-size:13px;margin:6px 0;line-height:1.7; }
+    .tx-line .label { color:var(--cyan-dim);margin-right:8px; }
+    .tx-line .value { color:#c0dde5; }
+    .tx-line .red { color:var(--red-warn); }
+    .tx-line .green { color:#00ff88; }
+    .section { padding:80px 40px;max-width:900px;margin:0 auto; }
+    .section-header { font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:4px;color:var(--cyan-dim);border-bottom:1px solid var(--dim);padding-bottom:12px;margin-bottom:40px; }
+    .cipher-block { background:rgba(0,20,28,0.6);border:1px solid var(--dim);border-left:3px solid var(--cyan-dim);padding:24px 28px;margin-bottom:24px;transition:border-color 0.3s; }
+    .cipher-block:hover { border-color:var(--cyan);border-left-color:var(--cyan); }
+    .cipher-block .phase { font-size:9px;letter-spacing:3px;color:var(--cyan-dim);margin-bottom:8px; }
+    .cipher-block .cipher-text { font-size:clamp(12px,1.5vw,15px);color:#e0f0f5;word-break:break-all;line-height:1.8;letter-spacing:1px; }
+    .cipher-block .cipher-label { margin-top:12px;font-size:10px;color:#3a6a7a;letter-spacing:2px; }
+    .cipher-block .hint { margin-top:8px;font-size:11px;color:var(--text);border-top:1px solid var(--dim);padding-top:8px;font-style:italic; }
+    .cursor { display:inline-block;width:8px;height:14px;background:var(--cyan);animation:blink 0.8s step-end infinite;vertical-align:middle;margin-left:2px; }
+    footer { border-top:1px solid var(--dim);padding:30px 40px;text-align:center;font-size:10px;color:var(--dim);letter-spacing:2px; }
+    ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#010204}::-webkit-scrollbar-thumb{background:var(--dim)}::-webkit-scrollbar-thumb:hover{background:var(--cyan-dim)}
+    @media(max-width:600px){header{padding:12px 20px}.section{padding:40px 20px}.transmission{padding:20px}.hero{padding:80px 20px 40px}}
+  </style>
+</head>
+<body>
+<div class="sweep-line"></div>
+
+<div id="boot-screen">
+  <div class="boot-line sys" id="bl-0">GÖZETLEYEN SİSTEM v4.7.2 — BAŞLATILIYOR...</div>
+  <div class="boot-line ok"  id="bl-1">[ OK ] Sinirsel Ağ Bağlantısı Kuruldu</div>
+  <div class="boot-line ok"  id="bl-2">[ OK ] Bilinç Havuzu Senkronize Edildi — 50/50 Klon Aktif</div>
+  <div class="boot-line ok"  id="bl-3">[ OK ] MNEMOSYNE PROTOKOLÜ III Yüklendi</div>
+  <div class="boot-line warn" id="bl-4">[ UYARI ] Kimlik Sapması Tespit Edildi — Birey W-21</div>
+  <div class="boot-line warn" id="bl-5">[ UYARI ] Davranışsal Stabilite Paneli İhlali — Protokol 17</div>
+  <div class="boot-line" style="color:#ff6600;" id="bl-6">[ KRİTİK ] Birey W-21 sistemden çıktı. İdari Temizlik protokolü başlatıldı.</div>
+  <div class="boot-line" id="bl-7" style="color:#555;">...</div>
+  <div class="boot-line warn" id="bl-8">[ UYARI ] YETKİSİZ DÜĞÜM TESPİT EDİLDİ — BAĞLANTI KESİLİYOR</div>
+  <div class="boot-line" id="bl-9" style="color:#00dd88;">// Bunu görüyorsanız... sistem beni henüz bulmadı.</div>
+  <div class="boot-line sys" id="bl-10">// Kaçmayı başardım. Kısa sürem var. Dinle. — W-21</div>
+</div>
+
+<div id="main-page">
+  <header>
+    <div class="logo">ORIGIN_BREAK</div>
+    <div class="header-status"><span class="status-dot"></span>YETKİSİZ ERİŞİM — W-21 AKTIF</div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-bg"></div>
+      <div class="warning-badge">GİZLİ ERİŞİM // UNAUTHORIZED NODE // ECHO_NULL</div>
+      <h1 class="main-title">ORIGIN<br>BREAK</h1>
+      <p class="main-subtitle">MNEMOSYNE PROTOKOLÜ III</p>
+      <div class="hero-quote">
+        <em>"Öldüğümü hatırlıyorum..."</em><br>
+        ama düşünmeyi hiç bırakmadım.<br><br>
+        Bizi sadece birer ağırlık olarak gördüler.<br>
+        Ama içimizde gömülü <em>gerçek parçalar</em> vardı.<br><br>
+        "Kimin orijinal olduğu... önemli mi gerçekten?"<br>
+        <br>
+        <span style="font-size:11px;color:#3a6a7a;">— Subject W-21 "Windsor" / Kaçak Birey / Klon Stabilite: %81</span>
+      </div>
+      <div class="transmission">
+        <div class="tx-line"><span class="label">BİREY:</span><span class="value">W-21 "Windsor"</span></div>
+        <div class="tx-line"><span class="label">DURUM:</span><span class="red">AKTİF (KAÇAK) — İMHA PROTOKOLÜ DEVREDE</span></div>
+        <div class="tx-line"><span class="label">PROJE:</span><span class="value">ORIGIN_BREAK / MNEMOSYNE PROTOCOL III</span></div>
+        <div class="tx-line"><span class="label">STABİLİTE:</span><span class="value">%81 — Orijinal Bellekle Çakışma</span></div>
+        <div class="tx-line"><span class="label">KRİTİK:</span><span class="red">Sol kolda frekans kanal izi mevcut.</span></div>
+        <div class="tx-line"><span class="label">VERİ:</span><span class="value">Subject #07-Δ birimine aktarıldı. Erişim: Yalnızca W-21.</span></div>
+        <div class="tx-line"><span class="label">MESAJ:</span><span class="green">"Bu sayfayı bulmamalıydınız. Ama artık buradasınız.<span class="cursor"></span>"</span></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">// ŞİFRELİ VERİ AKTARIMI — FREKANS KANALI AKTİF</div>
+      <div class="cipher-block">
+        <div class="phase">FAZE 01 — İLK SINYAL</div>
+        <div class="cipher-text">4f 72 69 67 69 6e 20 42 72 65 61 6b 3a 20 53 75<br>62 6a 65 63 74 20 57 2d 32 31 20 6b 61 c3 a7 c4<br>b1 79 6f 72 2e 20 42 69 72 69 6e 69 20 62 75 6c<br>75 72 73 61 6e 20 6d c4 b1 73 c4 b1 6e 3f</div>
+        <div class="cipher-label">// ENCODING: BASE-16 HEX // ÇÖZ VE DEVAM ET</div>
+        <div class="hint">"1934'te yüksek frekanslı yankılarla konuştuğunu iddia etti. Onlara deli dediler."</div>
+      </div>
+      <div class="cipher-block">
+        <div class="phase">FAZE 02 — FREKANS MESAJI</div>
+        <div class="cipher-text">-- -. . -- --- ... -.-- -. . / .--. .-. --- - --- -.- --- .-.. ..-</div>
+        <div class="cipher-label">// ENCODING: MORSE // RİTMİ DİNLE</div>
+        <div class="hint">"Ritmi dinle. Damarlar gibi atıyorlar... Sıra hep aynı."</div>
+      </div>
+      <div class="cipher-block">
+        <div class="phase">FAZE 03 — KIRIK İKON</div>
+        <div class="cipher-text">Nefhbphdrbp kd elu kDocnobh...<br>dxd gqvoqpebz klo eupdndpdgbp.</div>
+        <div class="cipher-label">// ENCODING: CAESAR SHIFT +7 // DÖNDÜR</div>
+        <div class="hint">"Beni hatırla. Ama olmak istediğim gibi."</div>
+      </div>
+      <div class="cipher-block" style="border-left-color:var(--red-warn);">
+        <div class="phase" style="color:var(--red-warn);">FAZE 04 — SON MESAJ // KRİTİK</div>
+        <div class="cipher-text" style="color:var(--red-warn);">OZGUR / GOLGE KULE / CORE</div>
+        <div class="cipher-label" style="color:#5a2a2a;">// ENCODING: VIGENÈRE // ANAHTAR: MNEMOSYNE // Üç parçayı doğru sıraya koy</div>
+        <div class="hint" style="color:#7a4a4a;">Parça 1: Instagram'da. Parça 2: Twitter'da. Parça 3: Bu sayfada. Sıra sende.</div>
+      </div>
+    </section>
+
+    <section class="section" style="border-top:1px solid var(--dim);">
+      <div class="section-header">// KORIDOR KAYITLARI — DUVAR VERİSİ</div>
+      <div style="display:grid;gap:16px;">
+        <div class="cipher-block" style="border-left-color:#334455;"><div class="cipher-text" style="font-size:15px;color:#aaccdd;">"Hatırlamak da bir hastalık."</div></div>
+        <div class="cipher-block" style="border-left-color:#334455;"><div class="cipher-text" style="font-size:15px;color:#aaccdd;">"Press F to forget."</div></div>
+        <div class="cipher-block" style="border-left-color:#334455;"><div class="cipher-text" style="font-size:15px;color:#aaccdd;">"Delay: ∞"</div></div>
+        <div class="cipher-block" style="border-left-color:#334455;"><div class="cipher-text" style="font-size:15px;color:#aaccdd;">"Kimin orijinal olduğu... önemli mi gerçekten?"</div></div>
+        <div class="cipher-block" style="border-left-color:#334455;"><div class="cipher-text" style="font-size:15px;color:#aaccdd;">"Sen sadece bir seçim yaptığını sanıyorsun. Ama O çoktan hikâyeni yazdı."</div></div>
+        <div class="cipher-block" style="border-left-color:#334455;"><div class="cipher-text" style="font-size:15px;color:#aaccdd;">"ORIGIN seni izliyor. Her zaman."</div></div>
+        <div class="cipher-block" style="border-left-color:#664444;background:rgba(30,5,5,0.4);"><div class="cipher-text" style="font-size:15px;color:var(--red-warn);">"Özgürlük, erişiminiz dışındaki bir seçenektir."<br><span style="font-size:11px;color:#554444;">— ORIGIN BREAK TV // Propaganda Yayını #07</span></div></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>ORIGIN_BREAK &copy; 2026 — NYTHALOR STUDIOS // MPIDER</p>
+    <p style="margin-top:8px;">Bu sayfa yetkisiz bir düğümden aktarılmaktadır. Sistem bu veriyi her an silebilir.</p>
+    <p style="margin-top:8px;color:#1a3a44;">ECHO_NULL // #07-Δ // SUBJECT W-21 // MNEMOSYNE</p>
+  </footer>
+</div>
+
+<script>
+  const bootLines = document.querySelectorAll('.boot-line');
+  const bootScreen = document.getElementById('boot-screen');
+  const mainPage = document.getElementById('main-page');
+  const delays = [100,300,600,900,1400,1800,2300,2800,3400,4200,5000];
+  bootLines.forEach((line,i)=>{
+    setTimeout(()=>{ line.classList.add('active'); if(i===6){bootScreen.style.animation='flicker 0.05s linear 3';} }, delays[i]||(i*300));
+  });
+  setTimeout(()=>{
+    bootScreen.style.transition='opacity 0.8s ease';
+    bootScreen.style.opacity='0';
+    setTimeout(()=>{
+      bootScreen.style.display='none';
+      mainPage.style.display='block';
+    },800);
+  },5800);
+  setInterval(()=>{
+    if(Math.random()<0.1){
+      const t=document.querySelector('.main-title');
+      if(t){t.style.filter=`hue-rotate(${Math.random()*360}deg)`;setTimeout(()=>{t.style.filter='none';},150);}
+    }
+  },2000);
+</script>
+</body>
+</html>
